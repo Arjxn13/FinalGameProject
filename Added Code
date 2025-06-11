@@ -1,0 +1,61 @@
+using Unity.FPS.Game;
+using UnityEngine;
+using System.Collections;
+
+namespace Unity.FPS.Gameplay
+{
+    public class PowerupPickup : Pickup
+    {
+        [Header("Health Settings")]
+        [Tooltip("Amount of health to heal on pickup")]
+        public float HealAmount = 25f;
+
+        [Header("Temporary Buff Settings")]
+        [Tooltip("Duration of the buffs in seconds")]
+        public float BuffDuration = 10f;
+
+        [Tooltip("Multiplier for shooting rate")]
+        public float FireRateMultiplier = 1.5f;
+
+        [Tooltip("Multiplier for movement speed")]
+        public float MoveSpeedMultiplier = 1.5f;
+
+        [Tooltip("Multiplier for jump height")]
+        public float JumpHeightMultiplier = 1.3f;
+
+        protected override void OnPicked(PlayerCharacterController player)
+        {
+            Health playerHealth = player.GetComponent<Health>();
+            if (playerHealth && playerHealth.CanPickup())
+            {
+                // Heal the player
+                playerHealth.Heal(HealAmount);
+
+                // Apply temporary buffs
+                StartCoroutine(ApplyTemporaryBuffs(player));
+
+                // Visual/audio feedback
+                PlayPickupFeedback();
+
+                // Remove the pickup object
+                Destroy(gameObject);
+            }
+        }
+
+        IEnumerator ApplyTemporaryBuffs(PlayerCharacterController player)
+        {
+            // Cache original values
+            float originalMoveSpeed = player.MoveSpeed;
+            float originalJumpForce = player.JumpForce;
+
+            WeaponController weapon = player.GetComponent<WeaponController>();
+            float originalFireRate = weapon != null ? weapon.RateOfFire : 0f;
+
+            // Apply buffs
+            player.MoveSpeed *= MoveSpeedMultiplier;
+            player.JumpForce *= JumpHeightMultiplier;
+            if (weapon != null)
+                weapon.RateOfFire *= FireRateMultiplier;
+
+            // Wait for duration
+            yi
